@@ -50,7 +50,7 @@ typedef struct {
   med_history_t history;
   med_screen_t screen;
   med_buffer_t buffer;
-  int tty_fd;
+  int fd;
 } med_state_t;
 
 void med_state_init(med_state_t *state);
@@ -62,9 +62,7 @@ void med_state_render(med_state_t *state);
 void med_screen_init(med_screen_t *screen, int fd);
 void med_screen_update_size(med_screen_t *screen, int fd);
 void med_screen_set(med_screen_t *screen, int x, int y, med_cell_t *cell);
-
-void med_cells_init(med_cell_t *cells, int width, int height);
-void med_cells_clear(med_cell_t *cells, int width, int height);
+void med_screen_clear(med_screen_t *screen);
 
 void med_buffer_init(med_buffer_t *buffer, int cap);
 void med_buffer_clear(med_buffer_t *buffer);
