@@ -1,6 +1,9 @@
 build: clean
 	mkdir build
-	gcc src/main.c -o ./build/e -ltermbox
+	gcc src/med.c -o ./build/med
 
 clean:
 	rm -rf build
+
+run:
+	./build/med
