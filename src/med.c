@@ -105,44 +105,36 @@ void med_buffer_puts(med_buffer_t *buffer, char *str) {
 
 void med_screen_init(med_screen_t *screen, int fd) {
   med_screen_update_size(screen, fd);
-
   int n = screen->width * screen->height;
   screen->cells = (med_cell_t *)malloc(n * sizeof(med_cell_t));
-
   med_screen_clear(screen);
 }
 
 void med_screen_update_size(med_screen_t *screen, int fd) {
   struct winsize sz;
   ioctl(fd, TIOCGWINSZ, &sz);
-  screen->height = sz.ws_col;
-  screen->width = sz.ws_row;
+  screen->width = sz.ws_col;
+  screen->height = sz.ws_row;
 }
 
 void med_screen_set(med_screen_t *screen, int x, int y, med_cell_t *cell) {
-  int n = (screen->width * (y - 1) + x);
+  int n = screen->width * y + 1 + x;
   screen->cells[n] = *cell;
 }
 
 void med_state_handle_input(med_state_t *state, med_buffer_t *buffer) {
-  printf("%s", buffer->buf);
+  uint32_t ch = (uint32_t)buffer->buf[0];
+  med_cell_t cell = {ch, 0, 0};
+  med_screen_set(&state->screen, 3, 3, &cell);
+  med_state_render(state);
 }
 
 int main(int argc, char **argv) {
   med_state_t state;
-
-  med_cell_t cell1 = {'f', 0, 0};
-  med_cell_t cell2 = {'o', 0, 0};
-  med_cell_t cell3 = {'o', 0, 0};
-
   med_state_init(&state);
 
-  state.cursor.x = 5;
-  state.cursor.y = 5;
-
-  med_screen_set(&state.screen, 2, 10, &cell1);
-  med_screen_set(&state.screen, 3, 10, &cell2);
-  med_screen_set(&state.screen, 4, 10, &cell3);
+  state.cursor.x = 1;
+  state.cursor.y = 1;
 
   med_state_render(&state);
 
