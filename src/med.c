@@ -27,12 +27,9 @@ void med_state_open(med_state_t *state) {
 }
 
 void med_state_termios(med_state_t *state) {
-  struct termios orig_tios;
   struct termios tios;
 
-  tcgetattr(state->fd, &orig_tios);
-
-  memcpy(&tios, &orig_tios, sizeof(tios));
+  tcgetattr(state->fd, &tios);
 
   tios.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
   tios.c_oflag &= ~OPOST;
