@@ -22,6 +22,10 @@ void med_state_init(med_state_t *state) {
   med_state_render(state);
 }
 
+void med_state_free(med_state_t *state) {
+
+}
+
 void med_state_open(med_state_t *state) {
   state->fd = open("/dev/tty", O_RDWR);
 }
@@ -123,10 +127,71 @@ void med_screen_set(med_screen_t *screen, int x, int y, med_cell_t *cell) {
 }
 
 void med_state_handle_input(med_state_t *state, med_buffer_t *buffer) {
-  uint32_t ch = (uint32_t)buffer->buf[0];
-  med_cell_t cell = {ch, 0, 0};
-  med_screen_set(&state->screen, 3, 3, &cell);
+
+  uint32_t key = -1;
+  med_key_extract(buffer, &key);
+
+  switch (key) {
+    case MED_KEY_LEFT:
+      med_state_cursor_move(state, -1, 0);
+      break;
+    case MED_KEY_RIGHT:
+      med_state_cursor_move(state, 1, 0);
+      break;
+    case MED_KEY_UP:
+      med_state_cursor_move(state, 0, -1);
+      break;
+    case MED_KEY_DOWN:
+      med_state_cursor_move(state, 0, 1);
+      break;
+    case MED_KEY_CTRL_Q:
+      exit(0);
+    default:
+      break;
+  }
+
   med_state_render(state);
+}
+
+void med_key_extract(med_buffer_t *buffer, uint32_t *key) {
+  if (buffer->buf[0] == '\033') {
+    int i;
+    for (i = 0; i < 22; i++) {
+      if (strncmp(buffer->buf, MED_KEYS_ESC[i], buffer->len) == 0) {
+        *key = (uint32_t)MED_KEYS[i];
+        return;
+      }
+    }
+  } else {
+    med_buffer_to_unicode(buffer, key);
+  }
+}
+
+void med_state_cursor_move(med_state_t *state, int x, int y) {
+  int new_x = state->cursor.x + x;
+  int new_y = state->cursor.y + y;
+
+  if (new_x >= 0 && new_x <= state->screen.width) {
+    state->cursor.x = new_x;
+  }
+  if (new_y >= 0 && new_y <= state->screen.height) {
+    state->cursor.y = new_y;
+  }
+  if (new_x > state->screen.width && new_y < state->screen.height) {
+    state->cursor.x = 0;
+    state->cursor.y = new_y + 1;
+  }
+}
+
+int med_buffer_to_unicode(med_buffer_t *buffer, uint32_t *ch) {
+  int len = buffer->len;
+  if (len == 0) return 0;
+  *ch = (uint32_t)buffer->buf[0];
+  if (len > 1) *ch &= (uint32_t)buffer->buf[1] >> 4;
+  if (len > 2) *ch &= (uint32_t)buffer->buf[2] >> 8;
+  if (len > 3) *ch &= (uint32_t)buffer->buf[3] >> 12;
+  if (len > 4) *ch &= (uint32_t)buffer->buf[4] >> 16;
+  return len;
 }
 
 int main(int argc, char **argv) {
