@@ -187,10 +187,9 @@ int med_buffer_to_unicode(med_buffer_t *buffer, uint32_t *ch) {
   int len = buffer->len;
   if (len == 0) return 0;
   *ch = (uint32_t)buffer->buf[0];
-  if (len > 1) *ch &= (uint32_t)buffer->buf[1] >> 4;
-  if (len > 2) *ch &= (uint32_t)buffer->buf[2] >> 8;
-  if (len > 3) *ch &= (uint32_t)buffer->buf[3] >> 12;
-  if (len > 4) *ch &= (uint32_t)buffer->buf[4] >> 16;
+  if (len > 1) *ch &= (uint32_t)buffer->buf[1] >> 8;
+  if (len > 2) *ch &= (uint32_t)buffer->buf[2] >> 16;
+  if (len > 3) *ch &= (uint32_t)buffer->buf[3] >> 24;
   return len;
 }
 
